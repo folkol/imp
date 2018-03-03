@@ -35,7 +35,7 @@ token_exprs = [
 
 
 def usage():
-    sys.stderr.write('Usage: imp filename\\n')
+    print('Usage: imp filename.imp', file=sys.stderr)
     sys.exit(1)
 
 
