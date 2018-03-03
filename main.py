@@ -40,8 +40,12 @@ def usage():
 
 
 if __name__ == '__main__':
-    with open('factorial.imp') as f:
+    if len(sys.argv) != 2:
+        usage()
+    filename = sys.argv[1]
+    with open(filename) as f:
         text = f.read()
+
     tokens = lex(text, token_exprs)
     parse_result = parser()(tokens, 0)
     if not parse_result:
