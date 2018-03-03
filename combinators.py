@@ -26,10 +26,10 @@ class Keyword(Parser):
         self.tag = tag
 
     def __call__(self, tokens, pos):
-        if pos < len(tokens) and \
-                tokens[pos][0] == self.value and \
-                tokens[pos][1] is self.tag:
-            return Result(tokens[pos][0], pos + 1)
+        if pos < len(tokens):
+            value, tag = tokens[pos]
+            if value == self.value and tag is self.tag:
+                return Result(value, pos + 1)
 
 
 class Tag(Parser):
@@ -119,8 +119,6 @@ class Complete(Parser):
         result = self.parser(tokens, pos)
         if result and result.pos == len(tokens):
             return result
-        else:
-            return None
 
 
 class Exp(Parser):
