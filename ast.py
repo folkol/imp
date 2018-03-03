@@ -1,24 +1,19 @@
-class Equality:
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-
-class Aexp(Equality):
+class ArithmeticExpression(object):
     pass
 
 
-class IntAexp(Equality):
+class IntExp(ArithmeticExpression):
     def __init__(self, i):
         self.i = i
 
     def __repr__(self):
         return f'IntAexp({self.i})'
 
-    def eval(self, env):
+    def eval(self, ignored):
         return self.i
 
 
-class VarAexp(Aexp):
+class Variable(ArithmeticExpression):
     def __init__(self, name):
         self.name = name
 
@@ -32,7 +27,7 @@ class VarAexp(Aexp):
             return 0
 
 
-class BinopAexp(Aexp):
+class BinaryOperator(ArithmeticExpression):
     def __init__(self, op, left, right):
         self.op = op
         self.left = left
@@ -57,11 +52,11 @@ class BinopAexp(Aexp):
         return value
 
 
-class Bexp(Equality):
+class Boolean(object):
     pass
 
 
-class RelopBexp(Bexp):
+class RelationalExpression(Boolean):
     def __init__(self, op, left, right):
         self.op = op
         self.left = left
@@ -87,7 +82,7 @@ class RelopBexp(Bexp):
         return value
 
 
-class AndBexp(Bexp):
+class And(Boolean):
     def __init__(self, left, right):
         self.left = left
         self.right = right
@@ -98,7 +93,7 @@ class AndBexp(Bexp):
         return left_value and right_value
 
 
-class OrBexp(Bexp):
+class Or(Boolean):
     def __init__(self, left, right):
         self.left = left
         self.right = right
@@ -109,7 +104,7 @@ class OrBexp(Bexp):
         return left_value or right_value
 
 
-class NotBexp(Bexp):
+class Not(Boolean):
     def __init__(self, exp):
         self.exp = exp
 
@@ -118,11 +113,11 @@ class NotBexp(Bexp):
         return not value
 
 
-class Statement(Equality):
+class Statement(object):
     pass
 
 
-class AssignStatement(Statement):
+class Assignment(Statement):
     def __init__(self, name, aexp):
         self.name = name
         self.aexp = aexp
@@ -142,7 +137,7 @@ class CompoundStatement(Statement):
         self.second.eval(env)
 
 
-class IfStatement(Statement):
+class If(Statement):
     def __init__(self, condition, true_stmt, false_stmt):
         self.condition = condition
         self.true_stmt = true_stmt
@@ -157,7 +152,7 @@ class IfStatement(Statement):
                 self.false_stmt.eval(env)
 
 
-class WhileStatement(Statement):
+class While(Statement):
     def __init__(self, condition, body):
         self.condition = condition
         self.body = body

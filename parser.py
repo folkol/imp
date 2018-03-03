@@ -1,8 +1,8 @@
 from functools import reduce
 
-from ast import IntAexp, VarAexp, BinopAexp, RelopBexp, NotBexp, AndBexp, OrBexp, AssignStatement, CompoundStatement, \
-    IfStatement, WhileStatement
-from combinators import Reserved, Tag, Lazy, Exp, Optional, Phrase
+from ast import IntExp, Variable, BinaryOperator, RelationalExpression, Not, And, Or, Assignment, CompoundStatement, \
+    If, While
+from combinators import Keyword, Tag, Lazy, Exp, Optional, Complete
 
 RESERVED = 'RESERVED'
 INT = 'INT'
@@ -10,7 +10,7 @@ ID = 'ID'
 
 
 def keyword(kw):
-    return Reserved(kw, RESERVED)
+    return Keyword(kw, RESERVED)
 
 
 id = Tag(ID)
@@ -18,7 +18,7 @@ num = Tag(INT) ^ int
 
 
 def aexp_value():
-    return num ^ IntAexp | id ^ VarAexp
+    return num ^ IntExp | id ^ Variable
 
 
 def process_group(parsed):
@@ -35,7 +35,7 @@ def aexp_term():
 
 
 def process_binop(op):
-    return lambda l, r: BinopAexp(op, l, r)
+    return lambda l, r: BinaryOperator(op, l, r)
 
 
 def any_operator_in_list(ops):
@@ -66,7 +66,7 @@ def aexp():
 
 def process_relop(parsed):
     (left, op), right = parsed
-    return RelopBexp(op, left, right)
+    return RelationalExpression(op, left, right)
 
 
 def bexp_relop():
@@ -75,7 +75,7 @@ def bexp_relop():
 
 
 def bexp_not():
-    return keyword('not') + Lazy(bexp_term) ^ (lambda parsed: NotBexp(parsed[1]))
+    return keyword('not') + Lazy(bexp_term) ^ (lambda parsed: Not(parsed[1]))
 
 
 def bexp_group():
@@ -94,9 +94,9 @@ bexp_precedence_levels = [
 
 def process_logic(op):
     if op == 'and':
-        return lambda l, r: AndBexp(l, r)
+        return lambda l, r: And(l, r)
     elif op == 'or':
-        return lambda l, r: OrBexp(l, r)
+        return lambda l, r: Or(l, r)
     else:
         raise RuntimeError('unknown logic operator: ' + op)
 
@@ -108,7 +108,7 @@ def bexp():
 def assign_stmt():
     def process(parsed):
         (name, _), exp = parsed
-        return AssignStatement(name, exp)
+        return Assignment(name, exp)
 
     return id + keyword(':=') + aexp() ^ process
 
@@ -125,7 +125,7 @@ def if_stmt():
             _, false_stmt = false_parsed
         else:
             false_stmt = None
-        return IfStatement(condition, true_stmt, false_stmt)
+        return If(condition, true_stmt, false_stmt)
 
     return (keyword('if') + bexp() +
             keyword('then') + Lazy(stmt_list) +
@@ -136,7 +136,7 @@ def if_stmt():
 def while_stmt():
     def process(parsed):
         (((_, condition), _), body), _ = parsed
-        return WhileStatement(condition, body)
+        return While(condition, body)
 
     return (keyword('while') + bexp() +
             keyword('do') + Lazy(stmt_list) +
@@ -148,4 +148,4 @@ def stmt():
 
 
 def parser():
-    return Phrase(stmt_list())
+    return Complete(stmt_list())

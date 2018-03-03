@@ -21,10 +21,10 @@ class Parser(object):
         return Alternate(self, other)
 
     def __xor__(self, other):
-        return Process(self, other)
+        return Mapping(self, other)
 
 
-class Reserved(Parser):
+class Keyword(Parser):
     def __init__(self, value, tag):
         self.value = value
         self.tag = tag
@@ -103,7 +103,7 @@ class Repeat(Parser):
         return Result(results, pos)
 
 
-class Process(Parser):
+class Mapping(Parser):
     def __init__(self, parser, f):
         self.parser = parser
         self.f = f
@@ -129,7 +129,9 @@ class Lazy(Parser):
         return self.parser(tokens, pos)
 
 
-class Phrase(Parser):
+class Complete(Parser):
+    """This parser fail unless every token is consumed."""
+
     def __init__(self, parser):
         self.parser = parser
 

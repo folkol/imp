@@ -40,7 +40,7 @@ def usage():
 
 
 if __name__ == '__main__':
-    with open('foo.imp') as f:
+    with open('factorial.imp') as f:
         text = f.read()
     tokens = lex(text, token_exprs)
     parse_result = parser()(tokens, 0)
