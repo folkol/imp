@@ -1,10 +1,6 @@
-class Result(object):
-    def __init__(self, value, pos):
-        self.value = value
-        self.pos = pos
+from collections import namedtuple
 
-    def __repr__(self):
-        return f'Result({self.value}, {self.pos})'
+Result = namedtuple('Result', ['value', 'pos'])
 
 
 class Parser(object):
@@ -49,9 +45,6 @@ class Tag(Parser):
         else:
             return None
 
-    def __repr__(self):
-        return f'Tag({self.tag})'
-
 
 class Concat(Parser):
     def __init__(self, left, right):
@@ -76,9 +69,6 @@ class Alternate(Parser):
 
     def __call__(self, tokens, pos):
         return self.left(tokens, pos) or self.right(tokens, pos)
-
-    def __repr__(self):
-        return f'Alternate({self.left}, {self.right})'
 
 
 class Optional(Parser):
@@ -111,11 +101,7 @@ class Mapping(Parser):
     def __call__(self, tokens, pos):
         result = self.parser(tokens, pos)
         if result:
-            result.value = self.f(result.value)
-            return result
-
-    def __repr__(self):
-        return f'Process({self.parser}, {self.f})'
+            return Result(self.f(result.value), result.pos)
 
 
 class Lazy(Parser):

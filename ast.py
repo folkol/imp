@@ -6,9 +6,6 @@ class IntExp(ArithmeticExpression):
     def __init__(self, i):
         self.i = i
 
-    def __repr__(self):
-        return f'IntAexp({self.i})'
-
     def eval(self, ignored):
         return self.i
 
@@ -16,9 +13,6 @@ class IntExp(ArithmeticExpression):
 class Variable(ArithmeticExpression):
     def __init__(self, name):
         self.name = name
-
-    def __repr__(self):
-        return f'VarAexp({self.name})'
 
     def eval(self, env):
         if self.name in env:
@@ -32,9 +26,6 @@ class BinaryOperator(ArithmeticExpression):
         self.op = op
         self.left = left
         self.right = right
-
-    def __repr__(self):
-        return f'BinopAexp({self.op}, {self.left}, {self.right})'
 
     def eval(self, env):
         left_value = self.left.eval(env)
@@ -52,11 +43,11 @@ class BinaryOperator(ArithmeticExpression):
         return value
 
 
-class Boolean(object):
+class BooleanExpression(object):
     pass
 
 
-class RelationalExpression(Boolean):
+class RelationalExpression(BooleanExpression):
     def __init__(self, op, left, right):
         self.op = op
         self.left = left
@@ -82,7 +73,7 @@ class RelationalExpression(Boolean):
         return value
 
 
-class And(Boolean):
+class And(BooleanExpression):
     def __init__(self, left, right):
         self.left = left
         self.right = right
@@ -93,7 +84,7 @@ class And(Boolean):
         return left_value and right_value
 
 
-class Or(Boolean):
+class Or(BooleanExpression):
     def __init__(self, left, right):
         self.left = left
         self.right = right
@@ -104,7 +95,7 @@ class Or(Boolean):
         return left_value or right_value
 
 
-class Not(Boolean):
+class Not(BooleanExpression):
     def __init__(self, exp):
         self.exp = exp
 
