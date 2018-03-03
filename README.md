@@ -2,6 +2,10 @@
 
 Fooling around with parser combinators.
 
+```
+$ python3 main.py factorial.imp
+```
+
 ## References
 
 - https://en.wikipedia.org/wiki/Parser\_combinator
