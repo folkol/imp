@@ -1,8 +1,7 @@
 from functools import reduce
 
-from ast import IntExp, Variable, BinaryOperator, RelationalExpression, Not, And, Or, Assignment, CompoundStatement, \
-    If, While
-from combinators import Keyword, Tag, Lazy, Exp, Optional, Complete
+from ast import *
+from combinators import *
 
 RESERVED = 'RESERVED'
 INT = 'INT'
@@ -13,12 +12,12 @@ def keyword(kw):
     return Keyword(kw, RESERVED)
 
 
-id = Tag(ID)
+identifier = Tag(ID)
 num = Tag(INT) ^ int
 
 
 def aexp_value():
-    return num ^ IntExp | id ^ Variable
+    return num ^ IntExp | identifier ^ Variable
 
 
 def process_group(parsed):
@@ -110,7 +109,7 @@ def assign_stmt():
         (name, _), exp = parsed
         return Assignment(name, exp)
 
-    return id + keyword(':=') + aexp() ^ process
+    return identifier + keyword(':=') + aexp() ^ process
 
 
 def stmt_list():
