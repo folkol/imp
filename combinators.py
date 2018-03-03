@@ -48,6 +48,9 @@ class Tag(Parser):
         else:
             return None
 
+    def __repr__(self):
+        return f'Tag({self.tag})'
+
 
 class Concat(Parser):
     def __init__(self, left, right):
@@ -72,6 +75,9 @@ class Alternate(Parser):
 
     def __call__(self, tokens, pos):
         return self.left(tokens, pos) or self.right(tokens.pos)
+
+    def __repr__(self):
+        return f'Alternate({self.left}, {self.right})'
 
 
 class Optional(Parser):
@@ -107,6 +113,9 @@ class Process(Parser):
             result.value = self.f(result.value)
             return result
 
+    def __repr__(self):
+        return f'Process({self.parser}, {self.f})'
+
 
 class Lazy(Parser):
     def __init__(self, parser_func):
@@ -114,7 +123,7 @@ class Lazy(Parser):
         self.parser_func = parser_func
 
     def __call__(self, tokens, pos):
-        if not self.parser_func:
+        if not self.parser:
             self.parser = self.parser_func()
         return self.parser(tokens, pos)
 
@@ -143,7 +152,8 @@ class Exp(Parser):
             sepfunc, right = parsed
             return sepfunc(result.value, right)
 
-        next_parser = self.separator + self.parser ^ process_next()
+        next_parser = self.separator + self.parser ^ process_next
+
         next_result = result
         while next_result:
             next_result = next_parser(tokens, result.pos)

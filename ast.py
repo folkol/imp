@@ -4,11 +4,15 @@ class Equality:
 
 
 class Aexp(Equality):
+    pass
+
+
+class IntAexp(Equality):
     def __init__(self, i):
         self.i = i
 
     def __repr__(self):
-        return f'IntAxp({self.i})'
+        return f'IntAexp({self.i})'
 
 
 class VarAexp(Aexp):
