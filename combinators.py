@@ -30,8 +30,6 @@ class Keyword(Parser):
                 tokens[pos][0] == self.value and \
                 tokens[pos][1] is self.tag:
             return Result(tokens[pos][0], pos + 1)
-        else:
-            return None
 
 
 class Tag(Parser):
@@ -42,8 +40,6 @@ class Tag(Parser):
         value, tag = tokens[pos]
         if pos < len(tokens) and tag is self.tag:
             return Result(value, pos + 1)
-        else:
-            return None
 
 
 class Concat(Parser):
@@ -58,8 +54,6 @@ class Concat(Parser):
             if right_result:
                 combined_value = left_result.value, right_result.value
                 return Result(combined_value, right_result.pos)
-            else:
-                return None
 
 
 class Alternate(Parser):
