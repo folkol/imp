@@ -1,8 +1,12 @@
 from functools import reduce
 
-from ast import IntAexp, VarAexp, BinopAexp
-from combinators import Reserved, Tag, Lazy
-from main import RESERVED, ID, INT
+from ast import IntAexp, VarAexp, BinopAexp, RelopBexp, NotBexp, AndBexp, OrBexp, AssignStatement, CompoundStatement, \
+    IfStatement, WhileStatement
+from combinators import Reserved, Tag, Lazy, Exp, Optional, Phrase
+
+RESERVED = 'RESERVED'
+INT = 'INT'
+ID = 'ID'
 
 
 def keyword(kw):
@@ -36,13 +40,13 @@ def process_binop(op):
 
 def any_operator_in_list(ops):
     op_parsers = map(keyword, ops)
-    parser = reduce(lambda l, r: l | r, op_parsers)
+    parser = reduce((lambda l, r: l | r), op_parsers)
     return parser
 
 
 aexp_precedence_levels = [
     ['*', '/'],
-    ['+', '-']
+    ['+', '-'],
 ]
 
 
@@ -58,3 +62,90 @@ def precedence(value_parser, precedence_levels, combine):
 
 def aexp():
     return precedence(aexp_term(), aexp_precedence_levels, process_binop)
+
+
+def process_relop(parsed):
+    (left, op), right = parsed
+    return RelopBexp(op, left, right)
+
+
+def bexp_relop():
+    relops = ['<', '<=', '>', '>=', '=', '!=']
+    return aexp() + any_operator_in_list(relops) + aexp() ^ process_relop
+
+
+def bexp_not():
+    return keyword('not') + Lazy(bexp_term) ^ (lambda parsed: NotBexp(parsed[1]))
+
+
+def bexp_group():
+    return keyword('(') + Lazy(bexp) + keyword(')') ^ process_group
+
+
+def bexp_term():
+    return bexp_not() | bexp_relop() | bexp_group()
+
+
+bexp_precedence_levels = [
+    ['and'],
+    ['or'],
+]
+
+
+def process_logic(op):
+    if op == 'and':
+        return lambda l, r: AndBexp(l, r)
+    elif op == 'or':
+        return lambda l, r: OrBexp(l, r)
+    else:
+        raise RuntimeError('unknown logic operator: ' + op)
+
+
+def bexp():
+    return precedence(bexp_term(), bexp_precedence_levels, process_logic)
+
+
+def assign_stmt():
+    def process(parsed):
+        (name, _), exp = parsed
+        return AssignStatement(name, exp)
+
+    return id + keyword(':=') + aexp() ^ process
+
+
+def stmt_list():
+    separator = keyword(';') ^ CompoundStatement
+    return Exp(stmt(), separator)
+
+
+def if_stmt():
+    def process(parsed):
+        ((((_, condition), _), true_stmt), false_parsed), _ = parsed
+        if false_parsed:
+            _, false_stmt = false_parsed
+        else:
+            false_stmt = None
+        return IfStatement(condition, true_stmt, false_stmt)
+
+    return (keyword('if') + bexp() +
+            keyword('then') + Lazy(stmt_list) +
+            Optional(keyword('else') + Lazy(stmt_list)) +
+            keyword('end') ^ process)
+
+
+def while_stmt():
+    def process(parsed):
+        (((_, condition), _), body), _ = parsed
+        return WhileStatement(condition, body)
+
+    return (keyword('while') + bexp() +
+            keyword('do') + Lazy(stmt_list) +
+            keyword('end') ^ process)
+
+
+def stmt():
+    return assign_stmt() | if_stmt() | while_stmt()
+
+
+def parser():
+    return Phrase(stmt_list())

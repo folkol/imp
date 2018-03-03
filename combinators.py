@@ -30,9 +30,10 @@ class Reserved(Parser):
         self.tag = tag
 
     def __call__(self, tokens, pos):
-        value, tag = tokens[pos]
-        if pos < len(tokens) and value == self.value and tag is self.tag:
-            return Result(value, pos + 1)
+        if pos < len(tokens) and \
+                tokens[pos][0] == self.value and \
+                tokens[pos][1] is self.tag:
+            return Result(tokens[pos][0], pos + 1)
         else:
             return None
 
@@ -74,7 +75,7 @@ class Alternate(Parser):
         self.right = right
 
     def __call__(self, tokens, pos):
-        return self.left(tokens, pos) or self.right(tokens.pos)
+        return self.left(tokens, pos) or self.right(tokens, pos)
 
     def __repr__(self):
         return f'Alternate({self.left}, {self.right})'
