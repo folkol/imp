@@ -114,7 +114,7 @@ def assign_stmt():
 
 
 def stmt_list():
-    separator = keyword(';') ^ CompoundStatement
+    separator = keyword(';') ^ (lambda x: lambda l, r: CompoundStatement(l, r))
     return Exp(stmt(), separator)
 
 

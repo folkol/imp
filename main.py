@@ -1,7 +1,7 @@
 import sys
 
 from lexer import lex
-from parser import parser, RESERVED, INT, ID, aexp
+from parser import parser, RESERVED, INT, ID
 
 token_exprs = [
     (r'[ \n\t]+', None),
@@ -34,21 +34,23 @@ token_exprs = [
 ]
 
 
-def imp_parse(tokens):
-    return parser()(tokens, 0)
+def usage():
+    sys.stderr.write('Usage: imp filename\\n')
+    sys.exit(1)
 
 
-if __name__ == "__main__":
-    # if len(sys.argv) != 2:
-    #     print(f'usage: {sys.argv[0]} filename')
-    #     sys.exit(1)
-    # filename = sys.argv[1]
+if __name__ == '__main__':
+    with open('foo.imp') as f:
+        text = f.read()
+    tokens = lex(text, token_exprs)
+    parse_result = parser()(tokens, 0)
+    if not parse_result:
+        print('Parse error!', file=sys.stderr)
+        sys.exit(1)
+    ast = parse_result.value
+    env = {}
+    ast.eval(env)
 
-    filename = 'foo.imp'
-
-    with open(filename) as f:
-        chars = f.read()
-    tokens = lex(chars, token_exprs)
-    # result = imp_parse(tokens)
-    result = aexp()(tokens, 0)
-    print(result)
+    print('Final variable values:')
+    for name in env:
+        print(name, env[name])
